@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Psychrometric Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Psychrometric Properties Calculator</h1>
+            <p>Calculate various air properties from different input combinations</p>
+        </header>
+        
+        <main>
+            <div class="calculator-section">
+                <h2>Input Conditions</h2>
+                
+                <div class="input-group">
+                    <label for="input-type">Input Combination:</label>
+                    <select id="input-type">
+                        <option value="dbt_wbt">Dry Bulb Temp + Wet Bulb Temp</option>
+                        <option value="dbt_rh">Dry Bulb Temp + Relative Humidity</option>
+                        <option value="dbt_dpt">Dry Bulb Temp + Dew Point Temp</option>
+                        <option value="wbt_rh">Wet Bulb Temp + Relative Humidity</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label id="value1-label" for="value1">Dry Bulb Temperature (°C):</label>
+                    <input type="number" id="value1" step="0.01" min="-100" max="100" value="25">
+                </div>
+                
+                <div class="input-group">
+                    <label id="value2-label" for="value2">Wet Bulb Temperature (°C):</label>
+                    <input type="number" id="value2" step="0.01" min="-100" max="100" value="20">
+                </div>
+                
+                <div class="input-group">
+                    <label for="altitude">Altitude (m):</label>
+                    <input type="number" id="altitude" step="1" min="0" max="10000" value="0">
+                </div>
+                
+                <button id="calculate-btn">Calculate Properties</button>
+            </div>
+            
+            <div class="results-section">
+                <h2>Calculated Properties</h2>
+                
+                <div class="results-grid">
+                    <div class="result-item">
+                        <span class="property-name">Dry Bulb Temperature:</span>
+                        <span class="property-value" id="dbt-result">25.0°C</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span class="property-name">Wet Bulb Temperature:</span>
+                        <span class="property-value" id="wbt-result">20.0°C</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span class="property-name">Relative Humidity:</span>
+                        <span class="property-value" id="rh-result">60.0%</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span class="property-name">Dew Point Temperature:</span>
+                        <span class="property-value" id="dpt-result">15.0°C</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span class="property-name">Humidity Ratio:</span>
+                        <span class="property-value" id="humidity-ratio">0.0113 kg/kg</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span class="property-name">Enthalpy:</span>
+                        <span class="property-value" id="enthalpy">45.0 kJ/kg</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span class="property-name">Specific Volume:</span>
+                        <span class="property-value" id="specific-volume">0.85 m³/kg</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span class="property-name">Vapor Pressure:</span>
+                        <span class="property-value" id="vapor-pressure">2.34 kPa</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Note: Calculations are based on standard psychrometric formulas. Results are approximate.</p>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
