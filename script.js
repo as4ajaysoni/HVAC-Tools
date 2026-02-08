@@ -331,6 +331,7 @@ const value1Input = document.getElementById('value1');
 const value2Input = document.getElementById('value2');
 const altitudeInput = document.getElementById('altitude');
 const calculateBtn = document.getElementById('calculate-btn');
+const citySelect = document.getElementById('city-select');
 
 // Result elements
 const dbtResultEl = document.getElementById('dbt-result');
@@ -466,6 +467,26 @@ function hideError() {
     }
 }
 
+// City weather data - representative conditions for major cities
+const cityWeatherData = {
+    'New York': { dbt: 22, wbt: 18, rh: 65, dpt: 15, altitude: 10 },
+    'London': { dbt: 15, wbt: 12, rh: 75, dpt: 10, altitude: 35 },
+    'Tokyo': { dbt: 28, wbt: 24, rh: 70, dpt: 21, altitude: 40 },
+    'Sydney': { dbt: 25, wbt: 18, rh: 55, dpt: 12, altitude: 50 },
+    'Dubai': { dbt: 40, wbt: 25, rh: 25, dpt: 15, altitude: 30 },
+    'Singapore': { dbt: 30, wbt: 26, rh: 80, dpt: 25, altitude: 15 },
+    'Mumbai': { dbt: 32, wbt: 27, rh: 75, dpt: 24, altitude: 12 },
+    'Delhi': { dbt: 35, wbt: 22, rh: 40, dpt: 15, altitude: 220 },
+    'Moscow': { dbt: 10, wbt: 6, rh: 70, dpt: 4, altitude: 156 },
+    'Rio de Janeiro': { dbt: 30, wbt: 24, rh: 65, dpt: 20, altitude: 3 },
+    'Los Angeles': { dbt: 25, wbt: 15, rh: 40, dpt: 8, altitude: 90 },
+    'Paris': { dbt: 18, wbt: 14, rh: 70, dpt: 11, altitude: 35 },
+    'Beijing': { dbt: 26, wbt: 19, rh: 55, dpt: 14, altitude: 50 },
+    'Cairo': { dbt: 35, wbt: 20, rh: 30, dpt: 12, altitude: 23 },
+    'Bangkok': { dbt: 32, wbt: 27, rh: 75, dpt: 24, altitude: 10 }
+};
+
+
 // Initialize with default values
 document.addEventListener('DOMContentLoaded', function() {
     // Set default values
@@ -492,6 +513,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
     altitudeInput.addEventListener('input', function() {
         calculateBtn.click();
+    });
+    
+    // City selection event listener
+    citySelect.addEventListener('change', function() {
+        console.log('City selection changed:', citySelect.value);
+        const cityName = citySelect.value;
+        console.log('City name:', cityName);
+        if (cityName && cityWeatherData[cityName]) {
+            const cityData = cityWeatherData[cityName];
+            console.log('City data found:', cityData);
+            
+            // Set the input type to DBT+WBT by default when selecting a city
+            inputTypeSelect.value = 'dbt_wbt';
+            updateInputLabels(); // Update the labels based on the new input type
+            
+            // Populate the input fields with city data
+            value1Input.value = cityData.dbt.toString();   // DBT
+            value2Input.value = cityData.wbt.toString();   // WBT
+            altitudeInput.value = cityData.altitude.toString(); // Altitude
+            
+            console.log('Values set - DBT:', cityData.dbt, 'WBT:', cityData.wbt, 'Altitude:', cityData.altitude);
+            
+            // Trigger calculation
+            calculateBtn.click();
+        } else {
+            console.log('No city data found for:', cityName);
+        }
     });
     
     // Set initial labels

@@ -1,0 +1,19 @@
+{
+  "name": "psychrometric-calculator",
+  "version": "1.0.0",
+  "description": "A web-based calculator for psychrometric properties of air",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "psychrometrics",
+    "calculator",
+    "HVAC",
+    "engineering",
+    "thermodynamics"
+  ],
+  "author": "Psychrometric Calculator",
+  "license": "MIT"
+}
