@@ -9,6 +9,10 @@
 <body>
     <div class="container">
         <header>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link active">Calculator</a>
+                <a href="references.html" class="nav-link">Formulas & References</a>
+            </nav>
             <h1>Psychrometric Properties Calculator</h1>
             <p>Calculate various air properties from different input combinations</p>
         </header>
@@ -67,6 +71,67 @@
                 <button id="calculate-btn">Calculate Properties</button>
             </div>
             
+            <!-- CSV Batch Processing Section -->
+            <div class="csv-section">
+                <h2>Batch Processing (CSV)</h2>
+                
+                <div class="csv-upload-area" id="csv-upload-area">
+                    <div class="upload-prompt">
+                        <div class="upload-icon">📁</div>
+                        <p>Drag and drop CSV file here or click to browse</p>
+                        <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+                        <button class="browse-btn" onclick="document.getElementById('csv-file-input').click()">Browse Files</button>
+                    </div>
+                </div>
+                
+                <div class="csv-controls" id="csv-controls" style="display: none;">
+                    <div class="file-info">
+                        <span class="file-name" id="file-name"></span>
+                        <button class="remove-file-btn" id="remove-file-btn">✕</button>
+                    </div>
+                    
+                    <div class="csv-actions">
+                        <button class="download-sample-btn" id="download-sample-btn">📥 Download Sample CSV</button>
+                        <button class="process-csv-btn" id="process-csv-btn">🔄 Process CSV</button>
+                    </div>
+                </div>
+                
+                <div class="csv-progress" id="csv-progress" style="display: none;">
+                    <h3>Processing...</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <p class="progress-text" id="progress-text">0%</p>
+                </div>
+                
+                <div class="csv-results" id="csv-results" style="display: none;">
+                    <h3>Processing Results</h3>
+                    <div class="results-summary">
+                        <div class="summary-item">
+                            <span class="summary-label">Total Rows:</span>
+                            <span class="summary-value" id="total-rows">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Successful:</span>
+                            <span class="summary-value success" id="successful-rows">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Errors:</span>
+                            <span class="summary-value error" id="error-rows">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="download-section">
+                        <button class="download-results-btn" id="download-results-btn">📥 Download Results CSV</button>
+                    </div>
+                    
+                    <div class="error-details" id="error-details" style="display: none;">
+                        <h4>Errors:</h4>
+                        <div class="error-list" id="error-list"></div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="results-section">
                 <h2>Calculated Properties</h2>
                 
@@ -119,6 +184,7 @@
         </footer>
     </div>
     
+    <script src="csv-processor.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

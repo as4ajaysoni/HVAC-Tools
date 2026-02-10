@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulas & References - Psychrometric Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .formula-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .formula-section h2 {
+            color: #3498db;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .formula-section h3 {
+            color: #2c3e50;
+            margin: 20px 0 10px 0;
+            font-size: 1.2rem;
+        }
+        
+        .formula {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            overflow-x: auto;
+        }
+        
+        .constant-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .constant-table th, .constant-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .constant-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .constant-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .reference-list {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        
+        .reference-list h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .reference-list ul {
+            margin-left: 20px;
+        }
+        
+        .reference-list li {
+            margin-bottom: 8px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+        
+        .back-link:hover {
+            background-color: #2980b9;
+        }
+        
+        .formula-note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="index.html" class="back-link">← Back to Calculator</a>
+            <h1>Formulas & References</h1>
+            <p>Comprehensive documentation of psychrometric formulas and equations used in this calculator</p>
+        </header>
+        
+        <main>
+            <!-- Fundamental Constants -->
+            <div class="formula-section">
+                <h2>Fundamental Constants</h2>
+                <p>The following physical constants are used throughout the psychrometric calculations:</p>
+                
+                <table class="constant-table">
+                    <thead>
+                        <tr>
+                            <th>Constant</th>
+                            <th>Symbol</th>
+                            <th>Value</th>
+                            <th>Units</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Gas constant for dry air</td>
+                            <td>R<sub>air</sub></td>
+                            <td>287.055</td>
+                            <td>J/(kg·K)</td>
+                            <td>Specific gas constant for dry air</td>
+                        </tr>
+                        <tr>
+                            <td>Gas constant for water vapor</td>
+                            <td>R<sub>water</sub></td>
+                            <td>461.523</td>
+                            <td>J/(kg·K)</td>
+                            <td>Specific gas constant for water vapor</td>
+                        </tr>
+                        <tr>
+                            <td>Specific heat of dry air</td>
+                            <td>c<sub>p,air</sub></td>
+                            <td>1006</td>
+                            <td>J/(kg·K)</td>
+                            <td>Specific heat at constant pressure for dry air</td>
+                        </tr>
+                        <tr>
+                            <td>Latent heat of vaporization</td>
+                            <td>h<sub>fg</sub></td>
+                            <td>2,501,000</td>
+                            <td>J/kg</td>
+                            <td>Latent heat at 0°C (base value)</td>
+                        </tr>
+                        <tr>
+                            <td>Antoine coefficient A</td>
+                            <td>A</td>
+                            <td>8.07131</td>
+                            <td>-</td>
+                            <td>Antoine equation coefficient for water</td>
+                        </tr>
+                        <tr>
+                            <td>Antoine coefficient B</td>
+                            <td>B</td>
+                            <td>1730.63</td>
+                            <td>-</td>
+                            <td>Antoine equation coefficient for water</td>
+                        </tr>
+                        <tr>
+                            <td>Antoine coefficient C</td>
+                            <td>C</td>
+                            <td>233.426</td>
+                            <td>-</td>
+                            <td>Antoine equation coefficient for water</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Saturated Vapor Pressure -->
+            <div class="formula-section">
+                <h2>Saturated Vapor Pressure</h2>
+                
+                <h3>Antoine Equation</h3>
+                <p>Used to calculate saturated vapor pressure at a given temperature.</p>
+                
+                <div class="formula">
+                    log<sub>10</sub>(P<sub>sat</sub>) = A - B/(C + T)
+                </div>
+                
+                <p>Where:</p>
+                <ul>
+                    <li>P<sub>sat</sub> = Saturated vapor pressure (mmHg)</li>
+                    <li>T = Temperature (°C)</li>
+                    <li>A, B, C = Antoine coefficients for water</li>
+                </ul>
+                
+                <div class="formula">
+                    P<sub>sat</sub>(kPa) = P<sub>sat</sub>(mmHg) × 0.133322
+                </div>
+                
+                <div class="formula-note">
+                    <strong>Note:</strong> Valid for temperature range 1°C to 100°C. For temperatures outside this range, more complex formulations like the Goff-Gratch equation would be required.
+                </div>
+            </div>
+            
+            <!-- Atmospheric Pressure -->
+            <div class="formula-section">
+                <h2>Atmospheric Pressure</h2>
+                
+                <h3>Barometric Pressure with Altitude</h3>
+                <p>Calculates atmospheric pressure at a given altitude using the hypsometric equation.</p>
+                
+                <div class="formula">
+                    P = P<sub>0</sub> × (1 - L×h/T<sub>0</sub>)<sup>g×M/(R×L)</sup>
+                </div>
+                
+                <p>Simplified for standard atmosphere:</p>
+                
+                <div class="formula">
+                    P = 101.325 × (1 - 0.0065×h/288.15)<sup>5.255</sup>
+                </div>
+                
+                <p>Where:</p>
+                <ul>
+                    <li>P = Atmospheric pressure at altitude h (kPa)</li>
+                    <li>P<sub>0</sub> = Sea level standard pressure (101.325 kPa)</li>
+                    <li>h = Altitude (m)</li>
+                    <li>L = Temperature lapse rate (0.0065 K/m)</li>
+                    <li>T<sub>0</sub> = Standard temperature at sea level (288.15 K)</li>
+                </ul>
+            </div>
+            
+            <!-- Humidity Ratio -->
+            <div class="formula-section">
+                <h2>Humidity Ratio</h2>
+                
+                <h3>From Dry Bulb and Wet Bulb Temperatures</h3>
+                
+                <div class="formula">
+                    W = [(1093 - 0.556×T<sub>wb</sub>)×W<sub>s,wb</sub> - 0.240×(T<sub>db</sub> - T<sub>wb</sub>)] / [1093 + 0.444×T<sub>db</sub> - T<sub>wb</sub>]
+                </div>
+                
+                <p>Where:</p>
+                <ul>
+                    <li>W = Humidity ratio (kg<sub>water</sub>/kg<sub>dry_air</sub>)</li>
+                    <li>T<sub>db</sub> = Dry bulb temperature (°C)</li>
+                    <li>T<sub>wb</sub> = Wet bulb temperature (°C)</li>
+                    <li>W<sub>s,wb</sub> = Saturated humidity ratio at wet bulb temperature</li>
+                </ul>
+                
+                <h3>From Dry Bulb Temperature and Relative Humidity</h3>
+                
+                <div class="formula">
+                    W = 0.621945 × (φ×P<sub>s,db</sub>) / (P - φ×P<sub>s,db</sub>)
+                </div>
+                
+                <p>Where:</p>
+                <ul>
+                    <li>φ = Relative humidity (decimal fraction)</li>
+                    <li>P<sub>s,db</sub> = Saturated vapor pressure at dry bulb temperature</li>
+                    <li>P = Atmospheric pressure</li>
+                </ul>
+                
+                <h3>From Dew Point Temperature</h3>
+                
+                <div class="formula">
+                    W = 0.621945 × P<sub>s,dp</sub> / (P - P<sub>s,dp</sub>)
+                </div>
+                
+                <p>Where P<sub>s,dp</sub> = Saturated vapor pressure at dew point temperature</p>
+            </div>
+            
+            <!-- Relative Humidity -->
+            <div class="formula-section">
+                <h2>Relative Humidity</h2>
+                
+                <h3>From Dry Bulb Temperature and Humidity Ratio</h3>
+                
+                <div class="formula">
+                    φ = (P<sub>w</sub> / P<sub>s,db</sub>) × 100%
+                </div>
+                
+                <p>Where:</p>
+                <ul>
+                    <li>P<sub>w</sub> = Partial pressure of water vapor = W×P/(0.621945 + W)</li>
+                    <li>P<sub>s,db</sub> = Saturated vapor pressure at dry bulb temperature</li>
+                </ul>
+                
+                <h3>From Dry Bulb and Dew Point Temperatures</h3>
+                
+                <div class="formula">
+                    φ = (P<sub>s,dp</sub> / P<sub>s,db</sub>) × 100%
+                </div>
+                
+                <p>Where P<sub>s,dp</sub> = Saturated vapor pressure at dew point temperature</p>
+            </div>
+            
+            <!-- Thermodynamic Properties -->
+            <div class="formula-section">
+                <h2>Thermodynamic Properties</h2>
+                
+                <h3>Specific Enthalpy</h3>
+                
+                <div class="formula">
+                    h = c<sub>p,air</sub>×T<sub>db</sub> + W×(h<sub>fg</sub> + c<sub>p,vapor</sub>×T<sub>db</sub>)
+                </div>
+                
+                <p>Simplified form:</p>
+                
+                <div class="formula">
+                    h = 1.006×T<sub>db</sub> + W×(2501 + 1.86×T<sub>db</sub>)
+                </div>
+                
+                <p>Where:</p>
+                <ul>
+                    <li>h = Specific enthalpy (kJ/kg<sub>dry_air</sub>)</li>
+                    <li>c<sub>p,vapor</sub> = Specific heat of water vapor ≈ 1.86 kJ/(kg·K)</li>
+                </ul>
+                
+                <h3>Specific Volume</h3>
+                
+                <div class="formula">
+                    v = R<sub>air</sub>×T<sub>K</sub> / P<sub>dry</sub>
+                </div>
+                
+                <p>Where:</p>
+                <ul>
+                    <li>v = Specific volume (m³/kg<sub>dry_air</sub>)</li>
+                    <li>T<sub>K</sub> = Absolute temperature (K) = T<sub>db</sub> + 273.15</li>
+                    <li>P<sub>dry</sub> = Partial pressure of dry air = P - P<sub>w</sub></li>
+                </ul>
+            </div>
+            
+            <!-- Temperature Conversions -->
+            <div class="formula-section">
+                <h2>Temperature Conversions</h2>
+                
+                <h3>Dew Point Temperature</h3>
+                
+                <p>Calculated by inverting the Antoine equation:</p>
+                
+                <div class="formula">
+                    T<sub>dp</sub> = B/(A - log<sub>10</sub>(P<sub>w</sub>/0.133322)) - C
+                </div>
+                
+                <p>Where P<sub>w</sub> = Partial pressure of water vapor (kPa)</p>
+                
+                <h3>Wet Bulb Temperature</h3>
+                
+                <p>Calculated iteratively from the definition of wet bulb temperature. For given dry bulb temperature and relative humidity:</p>
+                
+                <div class="formula-note">
+                    <strong>Iterative Solution:</strong> The wet bulb temperature is found by solving the energy balance equation iteratively until the calculated humidity ratio matches the humidity ratio derived from the given relative humidity.
+                </div>
+            </div>
+            
+            <!-- References -->
+            <div class="formula-section">
+                <h2>References & Standards</h2>
+                
+                <div class="reference-list">
+                    <h3>Primary References:</h3>
+                    <ul>
+                        <li><strong>ASHRAE Handbook - Fundamentals:</strong> American Society of Heating, Refrigerating and Air-Conditioning Engineers</li>
+                        <li><strong>ISO 7730:</strong> Ergonomics of the thermal environment</li>
+                        <li><strong>Cengel, Y.A. & Ghajar, A.J.:</strong> Heat and Mass Transfer: Fundamentals and Applications</li>
+                        <li><strong>Mills, A.F.:</strong> Basic Heat and Mass Transfer</li>
+                    </ul>
+                    
+                    <h3>Standard Values:</h3>
+                    <ul>
+                        <li><strong>Standard Atmospheric Pressure:</strong> 101.325 kPa at sea level</li>
+                        <li><strong>Standard Temperature:</strong> 15°C (288.15 K) at sea level</li>
+                        <li><strong>Temperature Lapse Rate:</strong> 6.5 K/km in troposphere</li>
+                    </ul>
+                    
+                    <h3>Applicability:</h3>
+                    <ul>
+                        <li>Valid for temperatures between -50°C and 50°C</li>
+                        <li>Accurate for altitudes up to 10,000 meters</li>
+                        <li>Assumes ideal gas behavior for air and water vapor mixtures</li>
+                        <li>Antoine equation valid for water temperatures 1°C to 100°C</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Note: These formulas are based on standard psychrometric relationships. For applications requiring high precision, consider using more complex formulations or reference tables from ASHRAE.</p>
+        </footer>
+    </div>
+    
+    <script src="references.js"></script>
+</body>
+</html>
