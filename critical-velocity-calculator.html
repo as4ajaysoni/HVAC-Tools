@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Critical Velocity Calculator - SEDH & NFPA 502</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Archivo:wght@300;600;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0a4d68;
+            --primary-light: #088395;
+            --accent: #05bfdb;
+            --accent-bright: #00ffcb;
+            --bg-dark: #0a0e27;
+            --bg-card: #1a1f3a;
+            --text-primary: #e8edf2;
+            --text-secondary: #9ba8b9;
+            --border: #2a3f5f;
+            --success: #00d9a3;
+            --warning: #ffb800;
+            --grid-size: 20px;
+            --nfpa-accent: #ff6b35;
+            --nfpa-light: #ff8c61;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Archivo', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            background-image: 
+                linear-gradient(rgba(8, 131, 149, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(8, 131, 149, 0.03) 1px, transparent 1px);
+            background-size: var(--grid-size) var(--grid-size);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -20%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(5, 191, 219, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-100px, 100px) scale(1.1); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        h1 {
+            font-family: 'Archivo', sans-serif;
+            font-weight: 900;
+            font-size: 3.5rem;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-bright) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(5, 191, 219, 0.3);
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(5, 191, 219, 0.4)); }
+            50% { filter: drop-shadow(0 0 30px rgba(5, 191, 219, 0.6)); }
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .tab::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .tab:hover {
+            color: var(--accent);
+        }
+
+        .tab.active {
+            color: var(--accent-bright);
+        }
+
+        .tab.active::after {
+            transform: scaleX(1);
+        }
+
+        .tab.nfpa.active {
+            color: var(--nfpa-accent);
+        }
+
+        .tab.nfpa.active::after {
+            background: var(--nfpa-accent);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-light), var(--accent));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nfpa-mode .card::before {
+            background: linear-gradient(90deg, var(--nfpa-accent), var(--nfpa-light));
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(5, 191, 219, 0.2);
+            border-color: var(--accent);
+        }
+
+        .nfpa-mode .card:hover {
+            box-shadow: 0 20px 40px rgba(255, 107, 53, 0.2);
+            border-color: var(--nfpa-accent);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nfpa-mode .card-title {
+            color: var(--nfpa-accent);
+        }
+
+        .card-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(180deg, var(--accent), var(--accent-bright));
+            border-radius: 2px;
+        }
+
+        .nfpa-mode .card-title::before {
+            background: linear-gradient(180deg, var(--nfpa-accent), var(--nfpa-light));
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            background: rgba(10, 14, 39, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(5, 191, 219, 0.1);
+            background: rgba(10, 14, 39, 0.8);
+        }
+
+        .nfpa-mode input[type="number"]:focus {
+            border-color: var(--nfpa-accent);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        input[type="number"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: rgba(10, 14, 39, 0.3);
+        }
+
+        /* Remove spinner arrows from number inputs */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .unit {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent) 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nfpa-mode .calculate-btn {
+            background: linear-gradient(135deg, var(--nfpa-accent) 0%, var(--nfpa-light) 100%);
+        }
+
+        .calculate-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .calculate-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(5, 191, 219, 0.4);
+        }
+
+        .nfpa-mode .calculate-btn:hover {
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .calculate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-section {
+            grid-column: 1 / -1;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            display: none;
+            animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .results-section.visible {
+            display: block;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, rgba(8, 131, 149, 0.1) 0%, rgba(5, 191, 219, 0.05) 100%);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nfpa-mode .result-card {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 140, 97, 0.05) 100%);
+            border-color: var(--nfpa-accent);
+        }
+
+        .result-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(5, 191, 219, 0.15), transparent);
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+        }
+
+        .nfpa-mode .result-card::after {
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.15), transparent);
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 300;
+        }
+
+        .result-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--accent-bright);
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .nfpa-mode .result-value {
+            color: var(--nfpa-light);
+        }
+
+        .result-unit {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .iteration-table {
+            margin-top: 2rem;
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        .iteration-table th {
+            background: rgba(8, 131, 149, 0.2);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nfpa-mode .iteration-table th {
+            background: rgba(255, 107, 53, 0.2);
+            color: var(--nfpa-accent);
+            border-bottom-color: var(--nfpa-accent);
+        }
+
+        .iteration-table td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .iteration-table tr:hover {
+            background: rgba(8, 131, 149, 0.05);
+        }
+
+        .nfpa-mode .iteration-table tr:hover {
+            background: rgba(255, 107, 53, 0.05);
+        }
+
+        .iteration-table tr.converged {
+            background: rgba(0, 217, 163, 0.1);
+        }
+
+        .convergence-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--success);
+            color: var(--bg-dark);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-box {
+            background: rgba(255, 184, 0, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .info-box p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .info-box.k1-info {
+            background: rgba(5, 191, 219, 0.1);
+            border-left-color: var(--accent);
+        }
+
+        .nfpa-mode .info-box.k1-info {
+            background: rgba(255, 107, 53, 0.1);
+            border-left-color: var(--nfpa-accent);
+        }
+
+        .k1-table {
+            margin-top: 1rem;
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        .k1-table th, .k1-table td {
+            padding: 0.5rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .k1-table th {
+            background: rgba(255, 107, 53, 0.2);
+            color: var(--nfpa-accent);
+            font-weight: 600;
+        }
+
+        .k1-table tr.active {
+            background: rgba(255, 107, 53, 0.15);
+            font-weight: 600;
+        }
+
+        @media (max-width: 968px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                text-align: left;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .computed-value {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(0, 217, 163, 0.2);
+            color: var(--success);
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Critical Velocity Calculator</h1>
+            <p class="subtitle">SEDH & NFPA 502 2017 Methods</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('sedh')">SEDH Handbook</button>
+            <button class="tab nfpa" onclick="switchTab('nfpa')">NFPA 502 2017</button>
+        </div>
+
+        <!-- SEDH Tab Content -->
+        <div id="sedh-content" class="tab-content active">
+            <div class="main-grid">
+                <div class="card">
+                    <h2 class="card-title">Environmental Parameters</h2>
+                    
+                    <div class="input-group">
+                        <label for="sedh_rho_a">Approach Air Density (ρa)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sedh_rho_a" value="1.2" step="0.01">
+                            <span class="unit">kg/m³</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="sedh_cp">Heat Capacity (Cp)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sedh_cp" value="1.005" step="0.001">
+                            <span class="unit">kJ/kg·K</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="sedh_g">Gravitational Acceleration (g)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sedh_g" value="9.81" step="0.01">
+                            <span class="unit">m/s²</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="sedh_ta">Temperature of Approach Air (Ta)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sedh_ta" value="319" step="1">
+                            <span class="unit">K</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Tunnel Specifications</h2>
+                    
+                    <div class="input-group">
+                        <label for="sedh_h">Tunnel Height (H)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sedh_h" value="6.5" step="0.1">
+                            <span class="unit">m</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="sedh_q">Convective Fire Heat Release Rate (Qc)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sedh_q" value="7000" step="100">
+                            <span class="unit">kW</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="sedh_k1">Froude Number Factor (K1)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sedh_k1" value="0.606" step="0.001">
+                            <span class="unit">-</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="sedh_a">Annular Cross Section Area (A)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sedh_a" value="50" step="1">
+                            <span class="unit">m²</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Grade & Blockage</h2>
+                    
+                    <div class="input-group">
+                        <label for="sedh_gf">Roadway Grade (Gf)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sedh_gf" value="-2" step="0.1">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="sedh_tunnel_area">Tunnel Area</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sedh_tunnel_area" value="47" step="1">
+                            <span class="unit">m²</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="sedh_train_area">Train Front Area</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sedh_train_area" value="10" step="1">
+                            <span class="unit">m²</span>
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        <p><strong>Note:</strong> Grade factor (Kg) and Blockage ratio (BR) are automatically calculated.</p>
+                        <p style="margin-top: 0.5rem;">
+                            <strong>Kg:</strong> <span class="computed-value" id="sedh_kg_display">-</span>
+                            <strong>BR:</strong> <span class="computed-value" id="sedh_br_display">-</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Execute Calculation</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                        Click the button below to perform iterative SEDH calculations until convergence is achieved (4 significant figures).
+                    </p>
+                    <button class="calculate-btn" onclick="calculate('sedh')">
+                        <span id="sedh-btn-text">Calculate Critical Velocity</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="results-section" id="sedh-results">
+                <h2 class="card-title">Results - SEDH Method</h2>
+                
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="result-label">Required Airflow</div>
+                        <div class="result-value">
+                            <span id="sedh-result-airflow">-</span>
+                            <span class="result-unit">m³/s</span>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-label">Critical Velocity (Tunnel Section)</div>
+                        <div class="result-value">
+                            <span id="sedh-result-tunnel">-</span>
+                            <span class="result-unit">m/s</span>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-label">Critical Velocity (Annular Section)</div>
+                        <div class="result-value">
+                            <span id="sedh-result-annular">-</span>
+                            <span class="result-unit">m/s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 3rem; margin-bottom: 1rem; color: var(--accent); font-size: 1.2rem;">Iteration Process</h3>
+                <div style="overflow-x: auto;">
+                    <table class="iteration-table">
+                        <thead>
+                            <tr>
+                                <th>Iteration</th>
+                                <th>Tf (K)</th>
+                                <th>Tf (°C)</th>
+                                <th>Vc Annulus (m/s)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sedh-iteration-tbody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-box" style="margin-top: 2rem;">
+                    <p><strong>Convergence Criteria:</strong> Iteration stops when the critical velocity at annulus (Vc) matches the previous value to 4 significant figures.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- NFPA 502 Tab Content -->
+        <div id="nfpa-content" class="tab-content nfpa-mode">
+            <div class="main-grid">
+                <div class="card">
+                    <h2 class="card-title">Environmental Parameters</h2>
+                    
+                    <div class="input-group">
+                        <label for="nfpa_rho_a">Approach Air Density (ρa)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="nfpa_rho_a" value="1.2" step="0.01">
+                            <span class="unit">kg/m³</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="nfpa_cp">Heat Capacity (Cp)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="nfpa_cp" value="1.005" step="0.001">
+                            <span class="unit">kJ/kg·K</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="nfpa_g">Gravitational Acceleration (g)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="nfpa_g" value="9.81" step="0.01">
+                            <span class="unit">m/s²</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="nfpa_ta">Temperature of Approach Air (Ta)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="nfpa_ta" value="319" step="1">
+                            <span class="unit">K</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Tunnel Specifications</h2>
+                    
+                    <div class="input-group">
+                        <label for="nfpa_h">Tunnel Height (H)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="nfpa_h" value="6.5" step="0.1">
+                            <span class="unit">m</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="nfpa_q">Convective Fire Heat Release Rate (Qc)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="nfpa_q" value="70" step="1" oninput="updateK1()">
+                            <span class="unit">MW</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="nfpa_k1">Froude Number Factor (K1) <span style="font-size: 0.75rem; color: var(--nfpa-accent);">[Auto-calculated]</span></label>
+                        <div class="input-wrapper">
+                            <input type="number" id="nfpa_k1" value="0.64" step="0.001" disabled>
+                            <span class="unit">-</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="nfpa_a">Annular Cross Section Area (A)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="nfpa_a" value="50" step="1">
+                            <span class="unit">m²</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Grade & Blockage</h2>
+                    
+                    <div class="input-group">
+                        <label for="nfpa_gf">Roadway Grade (Gf)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="nfpa_gf" value="-2" step="0.1">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="nfpa_tunnel_area">Tunnel Area</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="nfpa_tunnel_area" value="47" step="1">
+                            <span class="unit">m²</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="nfpa_train_area">Train Front Area</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="nfpa_train_area" value="10" step="1">
+                            <span class="unit">m²</span>
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        <p><strong>Note:</strong> Grade factor (Kg) and Blockage ratio (BR) are automatically calculated.</p>
+                        <p style="margin-top: 0.5rem;">
+                            <strong>Kg:</strong> <span class="computed-value" id="nfpa_kg_display">-</span>
+                            <strong>BR:</strong> <span class="computed-value" id="nfpa_br_display">-</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">K1 Factor Reference (NFPA 502 2017)</h2>
+                    <div class="info-box k1-info">
+                        <p><strong>Auto-Calculated:</strong> K1 factor is automatically determined based on the Convective Fire Heat Release Rate (Qc) according to NFPA 502 2017 standards.</p>
+                    </div>
+                    <table class="k1-table" id="k1-reference-table">
+                        <thead>
+                            <tr>
+                                <th>Q (MW)</th>
+                                <th>K1</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>&gt;100</td>
+                                <td>0.606</td>
+                            </tr>
+                            <tr>
+                                <td>90</td>
+                                <td>0.62</td>
+                            </tr>
+                            <tr class="active">
+                                <td>70</td>
+                                <td>0.64</td>
+                            </tr>
+                            <tr>
+                                <td>50</td>
+                                <td>0.68</td>
+                            </tr>
+                            <tr>
+                                <td>30</td>
+                                <td>0.74</td>
+                            </tr>
+                            <tr>
+                                <td>&lt;10</td>
+                                <td>0.87</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Execute Calculation</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                        Click the button below to perform iterative NFPA 502 calculations until convergence is achieved (4 significant figures).
+                    </p>
+                    <button class="calculate-btn" onclick="calculate('nfpa')">
+                        <span id="nfpa-btn-text">Calculate Critical Velocity</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="results-section" id="nfpa-results">
+                <h2 class="card-title">Results - NFPA 502 2017 Method</h2>
+                
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="result-label">Required Airflow</div>
+                        <div class="result-value">
+                            <span id="nfpa-result-airflow">-</span>
+                            <span class="result-unit">m³/s</span>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-label">Critical Velocity (Tunnel Section)</div>
+                        <div class="result-value">
+                            <span id="nfpa-result-tunnel">-</span>
+                            <span class="result-unit">m/s</span>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-label">Critical Velocity (Annular Section)</div>
+                        <div class="result-value">
+                            <span id="nfpa-result-annular">-</span>
+                            <span class="result-unit">m/s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 3rem; margin-bottom: 1rem; color: var(--nfpa-accent); font-size: 1.2rem;">Iteration Process</h3>
+                <div style="overflow-x: auto;">
+                    <table class="iteration-table">
+                        <thead>
+                            <tr>
+                                <th>Iteration</th>
+                                <th>Tf (K)</th>
+                                <th>Tf (°C)</th>
+                                <th>Vc Annulus (m/s)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="nfpa-iteration-tbody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-box" style="margin-top: 2rem;">
+                    <p><strong>Convergence Criteria:</strong> Iteration stops when the critical velocity at annulus (Vc) matches the previous value to 4 significant figures.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'sedh';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`${tab}-content`).classList.add('active');
+        }
+
+        function updateK1() {
+            const q_mw = parseFloat(document.getElementById('nfpa_q').value);
+            let k1;
+            
+            // NFPA 502 2017 table
+            if (q_mw > 100) {
+                k1 = 0.606;
+            } else if (q_mw >= 90) {
+                k1 = 0.62;
+            } else if (q_mw >= 70) {
+                k1 = 0.64;
+            } else if (q_mw >= 50) {
+                k1 = 0.68;
+            } else if (q_mw >= 30) {
+                k1 = 0.74;
+            } else {
+                k1 = 0.87;
+            }
+            
+            document.getElementById('nfpa_k1').value = k1;
+            
+            // Highlight active row in table
+            const rows = document.querySelectorAll('.k1-table tbody tr');
+            rows.forEach(row => row.classList.remove('active'));
+            
+            if (q_mw > 100) rows[0].classList.add('active');
+            else if (q_mw >= 90) rows[1].classList.add('active');
+            else if (q_mw >= 70) rows[2].classList.add('active');
+            else if (q_mw >= 50) rows[3].classList.add('active');
+            else if (q_mw >= 30) rows[4].classList.add('active');
+            else rows[5].classList.add('active');
+        }
+
+        function updateComputedValues(method) {
+            const gf = parseFloat(document.getElementById(`${method}_gf`).value);
+            const tunnel_area = parseFloat(document.getElementById(`${method}_tunnel_area`).value);
+            const train_area = parseFloat(document.getElementById(`${method}_train_area`).value);
+            
+            const kg = gf < 0 ? 1 + 0.0374 * Math.pow(-gf, 8/10) : 1;
+            const br = train_area / tunnel_area;
+            
+            document.getElementById(`${method}_kg_display`).textContent = kg.toFixed(4);
+            document.getElementById(`${method}_br_display`).textContent = br.toFixed(4);
+        }
+
+        function calculate(method) {
+            // Get input values
+            const rho_a = parseFloat(document.getElementById(`${method}_rho_a`).value);
+            const cp = parseFloat(document.getElementById(`${method}_cp`).value);
+            const g = parseFloat(document.getElementById(`${method}_g`).value);
+            const h = parseFloat(document.getElementById(`${method}_h`).value);
+            const ta = parseFloat(document.getElementById(`${method}_ta`).value);
+            let q = parseFloat(document.getElementById(`${method}_q`).value);
+            const k1 = parseFloat(document.getElementById(`${method}_k1`).value);
+            const a = parseFloat(document.getElementById(`${method}_a`).value);
+            const gf = parseFloat(document.getElementById(`${method}_gf`).value);
+            const tunnel_area = parseFloat(document.getElementById(`${method}_tunnel_area`).value);
+            const train_area = parseFloat(document.getElementById(`${method}_train_area`).value);
+
+            // Convert Q from MW to kW for NFPA
+            if (method === 'nfpa') {
+                q = q * 1000; // MW to kW
+            }
+
+            // Calculate dependent parameters
+            const kg = gf < 0 ? 1 + 0.0374 * Math.pow(-gf, 8/10) : 1;
+            const br = train_area / tunnel_area;
+
+            // Update computed values display
+            updateComputedValues(method);
+
+            // Show loading state
+            const btn = document.querySelector(`#${method}-content .calculate-btn`);
+            const btnText = document.getElementById(`${method}-btn-text`);
+            btnText.innerHTML = '<span class="loading"></span>';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                // Perform iterative calculation
+                const iterations = [];
+                let converged = false;
+                const maxIterations = 50;
+
+                for (let i = 0; i < maxIterations; i++) {
+                    let vc, tf;
+
+                    if (i === 0) {
+                        // FIRST ITERATION - uses Ta
+                        vc = k1 * kg * Math.pow((g * h * q) / (rho_a * cp * a * ta), 1/3);
+                        tf = (q / (rho_a * cp * a * vc)) + ta;
+                    } else {
+                        // SUBSEQUENT ITERATIONS - use previous Tf
+                        const tf_prev = iterations[i - 1].tf;
+                        vc = k1 * kg * Math.pow((g * h * q) / (rho_a * cp * a * tf_prev), 1/3);
+                        tf = (q / (rho_a * cp * a * vc)) + ta;
+                    }
+
+                    const tf_celsius = tf - 273.15;
+
+                    iterations.push({
+                        iteration: i + 1,
+                        tf: tf,
+                        tf_celsius: tf_celsius,
+                        vc: vc,
+                        converged: false
+                    });
+
+                    // Check convergence (4 significant figures)
+                    if (i > 0) {
+                        const vc_rounded = parseFloat(vc.toPrecision(4));
+                        const vc_prev_rounded = parseFloat(iterations[i-1].vc.toPrecision(4));
+                        
+                        if (Math.abs(vc_rounded - vc_prev_rounded) < 0.0001) {
+                            iterations[i].converged = true;
+                            converged = true;
+                            break;
+                        }
+                    }
+                }
+
+                // Get final converged value
+                const finalIteration = iterations[iterations.length - 1];
+                const vc_final = finalIteration.vc;
+
+                // Calculate final results
+                const required_airflow = vc_final * a;
+                const velocity_tunnel = vc_final * (1 - br);
+                const velocity_annular = vc_final;
+
+                // Display results
+                document.getElementById(`${method}-result-airflow`).textContent = required_airflow.toFixed(2);
+                document.getElementById(`${method}-result-tunnel`).textContent = velocity_tunnel.toFixed(4);
+                document.getElementById(`${method}-result-annular`).textContent = velocity_annular.toFixed(4);
+
+                // Display iteration table
+                const tbody = document.getElementById(`${method}-iteration-tbody`);
+                tbody.innerHTML = '';
+                iterations.forEach(iter => {
+                    const row = document.createElement('tr');
+                    if (iter.converged) {
+                        row.classList.add('converged');
+                    }
+                    row.innerHTML = `
+                        <td>${iter.iteration}</td>
+                        <td>${iter.tf.toFixed(6)}</td>
+                        <td>${iter.tf_celsius.toFixed(6)}</td>
+                        <td>${iter.vc.toFixed(10)}</td>
+                        <td>${iter.converged ? '<span class="convergence-badge">Converged</span>' : ''}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                // Show results section
+                document.getElementById(`${method}-results`).classList.add('visible');
+                document.getElementById(`${method}-results`).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                // Reset button
+                btnText.textContent = 'Calculate Critical Velocity';
+                btn.disabled = false;
+            }, 500);
+        }
+
+        // Initialize computed values on page load
+        updateComputedValues('sedh');
+        updateComputedValues('nfpa');
+        updateK1();
+
+        // Add input validation and auto-update for computed values
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value === '') return;
+                const value = parseFloat(this.value);
+                if (isNaN(value)) {
+                    this.style.borderColor = '#ff4444';
+                } else {
+                    this.style.borderColor = 'var(--border)';
+                }
+                
+                // Update computed values when relevant inputs change
+                const id = this.id;
+                if (id.includes('gf') || id.includes('tunnel_area') || id.includes('train_area')) {
+                    const method = id.split('_')[0];
+                    updateComputedValues(method);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
